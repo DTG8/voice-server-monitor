@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Server Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <div class="container">
+        <header>
+            <div>
+                <h1>Voice Servers</h1>
+                <p class="subtitle">Live Monitoring Dashboard</p>
+            </div>
+            <div class="status-summary">
+                <div class="summary-item">
+                    <span class="indicator global-up"></span>
+                    <span id="global-status-text">Checking...</span>
+                </div>
+                <div class="clock" id="clock">00:00:00</div>
+            </div>
+        </header>
+
+        <main id="server-grid" class="server-grid">
+            <!-- Server Cards will be injected here via JS -->
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Establishing connection...</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
