@@ -1,0 +1,8 @@
+[
+  { "name": "Cloud Phoenix", "host": "10.39.98.15", "type": "server" },
+  { "name": "VSOL Ince", "host": "10.39.98.109", "type": "server" },
+  { "name": "Cataleya Node 1", "host": "10.39.98.81", "type": "server" },
+  { "name": "Cataleya Node 2", "host": "10.39.98.82", "type": "server" },
+  { "name": "Easydial SessionHub", "host": "102.221.237.26", "type": "server" },
+  { "name": "OneNumber SessionHub", "host": "102.221.237.194", "type": "server" }
+]
