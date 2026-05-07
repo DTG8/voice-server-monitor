@@ -83,6 +83,59 @@ document.getElementById('menu-ping').addEventListener('click', async () => {
     }
 });
 
+// History Modal Logic
+const historyModal = document.getElementById('history-modal');
+const btnCloseHistoryModal = document.getElementById('close-history-modal');
+const historyTableBody = document.getElementById('history-table-body');
+const historyEmpty = document.getElementById('history-empty');
+
+btnCloseHistoryModal.addEventListener('click', () => historyModal.classList.add('hidden'));
+
+document.getElementById('menu-history').addEventListener('click', async () => {
+    if (!currentContextHost) return;
+    try {
+        const res = await fetch(`/api/history/${currentContextHost}`);
+        if (res.ok) {
+            const historyData = await res.json();
+            historyTableBody.innerHTML = '';
+            
+            if (historyData.length === 0) {
+                historyTableBody.parentElement.style.display = 'none';
+                historyEmpty.classList.remove('hidden');
+            } else {
+                historyTableBody.parentElement.style.display = 'table';
+                historyEmpty.classList.add('hidden');
+                
+                // Reverse to show latest first
+                historyData.slice().reverse().forEach(record => {
+                    const tr = document.createElement('tr');
+                    const eventClass = record.event === 'Downtime' ? 'event-down' : 'event-up';
+                    
+                    let durationText = '--';
+                    if (record.durationMs) {
+                        const seconds = Math.floor(record.durationMs / 1000);
+                        if (seconds < 60) durationText = `${seconds}s`;
+                        else {
+                            const minutes = Math.floor(seconds / 60);
+                            durationText = `${minutes}m ${seconds % 60}s`;
+                        }
+                    }
+                    
+                    tr.innerHTML = `
+                        <td class="${eventClass}">${record.event}</td>
+                        <td>${new Date(record.time).toLocaleString()}</td>
+                        <td>${durationText}</td>
+                    `;
+                    historyTableBody.appendChild(tr);
+                });
+            }
+            historyModal.classList.remove('hidden');
+        }
+    } catch (e) {
+        console.error("Fetch history error", e);
+    }
+});
+
 document.getElementById('menu-delete').addEventListener('click', async () => {
     if (!currentContextHost) return;
     if (confirm(`Are you sure you want to delete ${currentContextHost}?`)) {

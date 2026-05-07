@@ -348,3 +348,45 @@ header {
     margin: 0 auto 1rem;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* History Table */
+.history-modal-content {
+    max-width: 600px;
+}
+
+.history-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.history-table th, .history-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.history-table th {
+    background: var(--bg-panel-hover);
+    color: var(--text-secondary);
+    position: sticky;
+    top: 0;
+}
+
+.history-table tbody tr:hover {
+    background: var(--bg-panel-hover);
+}
+
+.history-table td.event-down {
+    color: var(--status-down);
+}
+
+.history-table td.event-up {
+    color: var(--status-up);
+}

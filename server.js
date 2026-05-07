@@ -18,10 +18,14 @@ if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir);
 }
 const devicesFile = path.join(dataDir, 'devices.json');
+const historyFile = path.join(dataDir, 'history.json');
 
-// Initialize devices file if not exists
+// Initialize files if not exists
 if (!fs.existsSync(devicesFile)) {
     fs.writeFileSync(devicesFile, JSON.stringify([]));
+}
+if (!fs.existsSync(historyFile)) {
+    fs.writeFileSync(historyFile, JSON.stringify({}));
 }
 
 let servers = [];
@@ -30,6 +34,18 @@ try {
 } catch (e) {
     console.error("Failed to parse devices.json", e);
     servers = [];
+}
+
+let downtimeHistory = {};
+try {
+    downtimeHistory = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+} catch (e) {
+    console.error("Failed to parse history.json", e);
+    downtimeHistory = {};
+}
+
+function saveHistory() {
+    fs.writeFileSync(historyFile, JSON.stringify(downtimeHistory, null, 2));
 }
 
 // In-memory state
@@ -44,7 +60,8 @@ function initServerState(s) {
             status: 'Unknown',
             latency: null,
             lastChecked: null,
-            isDownAlertSent: false
+            isDownAlertSent: false,
+            downtimeStart: null
         };
     } else {
         // Update name and type if changed
@@ -74,6 +91,16 @@ async function checkServers() {
         state.lastChecked = new Date().toISOString();
         
         if (res.alive) {
+            if (state.status === 'Down') {
+                if (!downtimeHistory[server.host]) downtimeHistory[server.host] = [];
+                downtimeHistory[server.host].push({
+                    event: 'Recovery',
+                    time: new Date().toISOString(),
+                    durationMs: state.downtimeStart ? (new Date() - new Date(state.downtimeStart)) : null
+                });
+                state.downtimeStart = null;
+                saveHistory();
+            }
             state.status = 'Up';
             state.latency = res.time === 'unknown' ? 'N/A' : res.time + ' ms';
             
@@ -83,6 +110,15 @@ async function checkServers() {
                 state.isDownAlertSent = false;
             }
         } else {
+            if (state.status !== 'Down') {
+                state.downtimeStart = new Date().toISOString();
+                if (!downtimeHistory[server.host]) downtimeHistory[server.host] = [];
+                downtimeHistory[server.host].push({
+                    event: 'Downtime',
+                    time: state.downtimeStart
+                });
+                saveHistory();
+            }
             state.status = 'Down';
             state.latency = 'Timeout';
             
@@ -178,6 +214,11 @@ app.post('/api/ping/:host', async (req, res) => {
     }
 
     res.json(state);
+});
+
+app.get('/api/history/:host', (req, res) => {
+    const host = req.params.host;
+    res.json(downtimeHistory[host] || []);
 });
 
 app.listen(PORT, () => {
